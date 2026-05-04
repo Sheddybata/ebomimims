@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/app_runtime.dart';
 import '../data/seed_units.dart';
 import '../models/app_role.dart';
 import '../models/session_user.dart';
@@ -24,7 +27,14 @@ class MobileAuthResult {
 }
 
 abstract final class SupabaseAuthService {
-  static SupabaseClient get _client => Supabase.instance.client;
+  static SupabaseClient get _client {
+    if (!supabaseApplicationReady) {
+      throw const AuthException(
+        'This app build is not connected to EBOMIM services. Ask IT for a configured release.',
+      );
+    }
+    return Supabase.instance.client;
+  }
 
   static Future<MobileAuthResult> signIn({
     required String email,
@@ -104,9 +114,13 @@ abstract final class SupabaseAuthService {
     );
   }
 
-  static Future<void> signOut() => _client.auth.signOut();
+  static Future<void> signOut() async {
+    if (!supabaseApplicationReady) return;
+    await _client.auth.signOut();
+  }
 
   static Future<SessionUser?> loadSessionUser(String userId) async {
+    if (!supabaseApplicationReady) return null;
     final row = await _client
         .from('profiles')
         .select('''
@@ -115,6 +129,7 @@ abstract final class SupabaseAuthService {
           role,
           email,
           phone,
+          avatar_url,
           directorates(code, name),
           units(code, name),
           reference_states(id, name)
@@ -163,7 +178,52 @@ abstract final class SupabaseAuthService {
       primaryUnitId: role == AppRole.unitHead ? primaryUnitCode : null,
       phone: row['phone'] as String?,
       email: row['email'] as String?,
+      avatarUrl: row['avatar_url'] as String?,
     );
+  }
+
+  static const String _avatarBucket = 'avatars';
+
+  /// Saves [localCroppedPath] as JPEG at `{userId}/avatar.jpg` and updates [profiles.avatar_url].
+  static Future<SessionUser?> uploadAvatarJpeg(String localCroppedPath) async {
+    final authUser = _client.auth.currentUser;
+    if (authUser == null) {
+      throw AuthException('Sign in again to update your photo.');
+    }
+    final file = File(localCroppedPath);
+    if (!await file.exists()) {
+      throw AuthException('Could not read the image file.');
+    }
+
+    final path = '${authUser.id}/avatar.jpg';
+    await _client.storage.from(_avatarBucket).upload(
+          path,
+          file,
+          fileOptions: const FileOptions(
+            contentType: 'image/jpeg',
+            upsert: true,
+          ),
+        );
+
+    final publicUrl = _client.storage.from(_avatarBucket).getPublicUrl(path);
+    await _client.from('profiles').update({'avatar_url': publicUrl}).eq('id', authUser.id);
+
+    return loadSessionUser(authUser.id);
+  }
+
+  static Future<SessionUser?> clearAvatar() async {
+    final authUser = _client.auth.currentUser;
+    if (authUser == null) {
+      throw AuthException('Sign in again to update your photo.');
+    }
+    final path = '${authUser.id}/avatar.jpg';
+    try {
+      await _client.storage.from(_avatarBucket).remove([path]);
+    } catch (_) {
+      // Object may not exist.
+    }
+    await _client.from('profiles').update({'avatar_url': null}).eq('id', authUser.id);
+    return loadSessionUser(authUser.id);
   }
 
   static AppRole? _mobileRoleFromSupabase(String? role) {

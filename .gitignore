@@ -7,3 +7,6 @@ tsconfig.tsbuildinfo
 
 mobile/.dart_tool/
 mobile/build/
+mobile/android/key.properties
+mobile/android/*.jks
+mobile/android/upload-keystore.jks

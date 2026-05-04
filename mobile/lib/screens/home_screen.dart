@@ -7,6 +7,7 @@ import '../providers/auth_provider.dart';
 import '../providers/reporting_framework_provider.dart';
 import '../providers/responsibilities_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/session_user_hero_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,39 +23,85 @@ class HomeScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          ..._header(context, user),
-          ..._responsibilitiesSection(context, user, respView),
-          ..._reportingMetricsSection(context, metricsView),
-          const SizedBox(height: 16),
-          _analyticsHint(context),
+          SessionUserHeroCard(
+            user: user,
+            showAvatar: false,
+            footer: user == null
+                ? null
+                : Text(
+                    _roleSubtitle(user.role),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                  ),
+          ),
+          if (user == null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Loading your workspace…',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            ..._homeLoadingPlaceholders(context),
+          ] else ...[
+            const SizedBox(height: 8),
+            ..._responsibilitiesSection(context, user, respView),
+            ..._reportingMetricsSection(context, metricsView),
+            const SizedBox(height: 16),
+            _analyticsHint(context),
+          ],
         ],
       ),
     );
   }
 
-  List<Widget> _header(BuildContext context, SessionUser? user) {
-    if (user == null) return [];
+  List<Widget> _homeLoadingPlaceholders(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    Widget bar(double w) => Container(
+          width: w,
+          height: 12,
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        );
     return [
-      Text(
-        'Hello, ${user.displayName}',
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
-      const SizedBox(height: 4),
-      Text(
-        '${user.role.label} · ${user.isStateCoordinator ? user.stateName : user.directorateName}',
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-      ),
-      const SizedBox(height: 12),
-      Text(
-        _roleSubtitle(user.role),
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.35,
-            ),
-      ),
       const SizedBox(height: 16),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              bar(180),
+              const SizedBox(height: 12),
+              bar(double.infinity),
+              const SizedBox(height: 8),
+              bar(double.infinity),
+              const SizedBox(height: 8),
+              bar(220),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              bar(140),
+              const SizedBox(height: 12),
+              bar(double.infinity),
+              const SizedBox(height: 8),
+              bar(double.infinity),
+            ],
+          ),
+        ),
+      ),
     ];
   }
 
@@ -158,11 +205,33 @@ class HomeScreen extends ConsumerWidget {
       Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(
-            'Responsibilities for this directorate will appear here once the charter is linked.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.link_off_outlined, color: Theme.of(context).colorScheme.outline),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Charter not linked',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Responsibilities for this directorate will appear here once the charter is linked to your account.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                    ),
+                  ],
                 ),
+              ),
+            ],
           ),
         ),
       ),

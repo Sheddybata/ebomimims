@@ -14,6 +14,7 @@ class SessionUser {
     this.primaryUnitId,
     this.phone,
     this.email,
+    this.avatarUrl,
   });
 
   final String id;
@@ -34,6 +35,9 @@ class SessionUser {
   final String? phone;
   final String? email;
 
+  /// Public URL from Supabase Storage (`avatars` bucket); shown on Profile only.
+  final String? avatarUrl;
+
   bool get isUnitHead => role == AppRole.unitHead;
   bool get isManager => role == AppRole.manager;
   bool get isDirector => role == AppRole.director;
@@ -51,6 +55,7 @@ class SessionUser {
         'primaryUnitId': primaryUnitId,
         if (phone != null) 'phone': phone,
         if (email != null) 'email': email,
+        if (avatarUrl != null) 'avatarUrl': avatarUrl,
       };
 
   factory SessionUser.fromJson(Map<String, dynamic> j) => SessionUser(
@@ -68,5 +73,6 @@ class SessionUser {
         primaryUnitId: j['primaryUnitId'] as String?,
         phone: j['phone'] as String?,
         email: j['email'] as String?,
+        avatarUrl: j['avatarUrl'] as String?,
       );
 }

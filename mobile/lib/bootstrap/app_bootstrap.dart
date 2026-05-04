@@ -8,7 +8,7 @@ import '../persistence/session_storage.dart';
 abstract final class AppBootstrap {
   static bool onboardingDone = false;
   static SessionUser? preloadedUser;
-  static late String initialLocation;
+  static String initialLocation = '/login';
 
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();

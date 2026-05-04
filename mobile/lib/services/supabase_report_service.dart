@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/app_runtime.dart';
 import '../data/metric_labels.dart';
 import '../models/app_role.dart';
 import '../models/report.dart';
@@ -8,7 +9,14 @@ import '../models/report_type.dart';
 import '../models/session_user.dart';
 
 abstract final class SupabaseReportService {
-  static SupabaseClient get _client => Supabase.instance.client;
+  static SupabaseClient get _client {
+    if (!supabaseApplicationReady) {
+      throw const AuthException(
+        'Sign in is unavailable: the app is not connected to the server.',
+      );
+    }
+    return Supabase.instance.client;
+  }
 
   static Future<Report> createReport({
     required SessionUser user,

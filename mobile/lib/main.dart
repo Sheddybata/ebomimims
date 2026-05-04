@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'bootstrap/app_bootstrap.dart';
+import 'config/app_runtime.dart';
 import 'config/supabase_config.dart';
 import 'firebase_background.dart';
 import 'firebase_options.dart';
@@ -23,6 +24,7 @@ Future<void> main() async {
       url: SupabaseConfig.url,
       anonKey: SupabaseConfig.anonKey,
     );
+    supabaseApplicationReady = true;
   }
   await AppBootstrap.load();
 

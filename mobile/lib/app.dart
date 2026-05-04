@@ -11,7 +11,7 @@ class ImsMobileApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     return MaterialApp.router(
-      title: 'EBOMIM',
+      title: 'EBOMIM IMS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: router,

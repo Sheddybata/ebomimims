@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-/// Loads per-person codes from [assets/config/access_codes.json].
+/// Loads invite codes from [assets/config/access_codes.json].
 ///
-/// Replace or extend this with Fire store / API when your backend is ready.
-/// JSON format: `[{ "code": "ABC-123", "label": "optional note" }]`
+/// For distribution, replace the default empty list with real codes before building.
+/// See [assets/config/access_codes.example.json] and `mobile/DISTRIBUTION.md`.
 abstract final class AccessCodeService {
   static List<_CodeEntry>? _cache;
 

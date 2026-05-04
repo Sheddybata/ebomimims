@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/app_runtime.dart';
 import '../data/directorates.dart';
 import '../data/seed_units.dart';
 import '../data/reference_states.dart';
@@ -399,6 +401,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   String _friendlyAuthError(Object error) {
+    if (error is AuthException) {
+      final m = error.message;
+      if (m.isNotEmpty) return m;
+    }
     final message = error.toString();
     if (message.contains('Invalid login credentials')) {
       return 'Incorrect email or password.';
@@ -583,6 +589,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverToBoxAdapter(child: _LoginHeader()),
+          if (!supabaseApplicationReady)
+            const SliverToBoxAdapter(child: _ServerConfigNotice()),
           if (_step == 0)
             SliverToBoxAdapter(
               child: Padding(
@@ -966,6 +974,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _ServerConfigNotice extends StatelessWidget {
+  const _ServerConfigNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF7ED),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFFDBA74)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.cloud_off_outlined, color: Colors.orange.shade800),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'This build is not pointed at EBOMIM servers. For field use, install the release from IT with working sign-in. Developers: run with SUPABASE_URL and SUPABASE_ANON_KEY (see mobile/DISTRIBUTION.md).',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF7C2D12),
+                  height: 1.45,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

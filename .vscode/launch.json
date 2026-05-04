@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "IMS mobile (Supabase from dart_defines.env)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/mobile",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define-from-file=dart_defines.env"]
+    },
+    {
+      "name": "IMS mobile (no Supabase — demo banner)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/mobile",
+      "program": "lib/main.dart"
+    }
+  ]
+}
